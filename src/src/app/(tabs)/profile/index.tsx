@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import { router } from 'expo-router';
 
 const Profile: React.FC = () => {
     return (
@@ -7,6 +8,8 @@ const Profile: React.FC = () => {
             <Text style={styles.title}>Perfil</Text>
             <Text>Nome: Usuário Exemplo</Text>
             <Text>Email: exemplo@email.com</Text>
+            <Button title="Editar Perfil" onPress={() => alert('Funcionalidade de edição de perfil')} />
+                <Button title="Sair" onPress={() => router.push('/sign-in')} />
         </View>
     );
 };
