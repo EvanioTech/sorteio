@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
 import { router } from "expo-router";
-import { db } from "../../db"; // importa seu banco
+import { db } from "../../db";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { User } from "../models";
 
 export default function Signin() {
   const [nome, setNome] = useState("");
@@ -14,16 +16,17 @@ export default function Signin() {
     }
 
     try {
-      // Busca usuário no banco
-      const user = await db.getFirstAsync(
+      const user:User = await db.getFirstAsync(
         "SELECT * FROM users WHERE nome = ? AND senha = ?",
         [nome, senha]
       );
 
       if (user) {
-        console.log("Login bem-sucedido:", user);
+        // Salva nome do usuário no AsyncStorage
+        await AsyncStorage.setItem("usuarioLogado", user.nome);
+
         Alert.alert("Sucesso", `Bem-vindo, ${user.nome}!`);
-        router.replace("/(tabs)"); // vai para a home
+        router.replace("/(tabs)");
       } else {
         Alert.alert("Erro", "Usuário ou senha inválidos.");
       }
@@ -35,7 +38,6 @@ export default function Signin() {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../../../assets/images/ger.png')} style={styles.logo} />
       <TextInput
         style={styles.input}
         placeholder="Digite seu nome"
@@ -57,7 +59,7 @@ export default function Signin() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
   input: {
     height: 48,
     width: "100%",
@@ -76,5 +78,4 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  logo: { width: 120, height: 120, alignSelf: 'center', marginBottom: 20 },
 });
