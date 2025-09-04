@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
 import { router } from "expo-router";
 import { db } from "../../db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -38,6 +38,7 @@ export default function Signin() {
 
   return (
     <View style={styles.container}>
+      <Image source={require("../../../assets/images/ger.png")} style={styles.logo} />
       <TextInput
         style={styles.input}
         placeholder="Digite seu nome"
@@ -59,7 +60,7 @@ export default function Signin() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
+  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20,backgroundColor: "white" },
   input: {
     height: 48,
     width: "100%",
@@ -78,4 +79,9 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  logo: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+  },
 });
