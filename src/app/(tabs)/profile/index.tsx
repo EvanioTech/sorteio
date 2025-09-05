@@ -5,6 +5,7 @@ import { initDB, getAllAsync, getFirstAsync, runAsync } from "../../../db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "../../../helpers/styleprofile";
 import { StatusBar } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 
 type User = {
   id: number;
@@ -76,13 +77,19 @@ const Profile: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Perfil</Text>
+      <View style={styles.divider1}>
+      <View style={styles.header} >
+      <FontAwesome style={styles.title} name="user-circle" size={100} color="#070707ff" />
 
       {user && <Text style={styles.info}>{user.nome}</Text>}
+      </View>
+      </View>
+      <View style={styles.divider2}>
+
 
       {/* Botão para limpar nomes */}
       {temNomes && (
-        <View style={styles.buttonContainer}>
+        <View style={styles.buttonContainer1}>
           <Button
             title="Limpar Sorteio de Nomes"
             onPress={() => Alert.alert(
@@ -100,7 +107,7 @@ const Profile: React.FC = () => {
 
       {/* Botão para limpar números */}
       {temNumeros && (
-        <View style={styles.buttonContainer}>
+        <View style={styles.buttonContainer2}>
           <Button
             title="Limpar Sorteio de Números"
             onPress={() => Alert.alert(
@@ -121,6 +128,7 @@ const Profile: React.FC = () => {
         <TouchableOpacity onPress={handleLogout} style={styles.button}>
           <Text style={styles.buttonText}>Sair</Text>
         </TouchableOpacity>
+      </View>
       </View>
       <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
       
