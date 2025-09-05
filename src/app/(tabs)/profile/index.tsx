@@ -84,7 +84,14 @@ const Profile: React.FC = () => {
         <View style={styles.buttonContainer}>
           <Button
             title="Limpar Sorteio de Nomes"
-            onPress={() => handleLimparSorteio("nome")}
+            onPress={() => Alert.alert(
+              "Confirmação",
+              "Tem certeza que deseja limpar todos os nomes?",
+              [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Confirmar", onPress: () => handleLimparSorteio("nome") }
+              ]
+            )}
             color="#d63384"
           />
         </View>
@@ -95,7 +102,14 @@ const Profile: React.FC = () => {
         <View style={styles.buttonContainer}>
           <Button
             title="Limpar Sorteio de Números"
-            onPress={() => handleLimparSorteio("numero")}
+            onPress={() => Alert.alert(
+              "Confirmação",
+              "Tem certeza que deseja limpar todos os números?",
+              [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Confirmar", onPress: () => handleLimparSorteio("numero") }
+              ]
+            )}
             color="#28a745"
           />
         </View>
@@ -105,6 +119,7 @@ const Profile: React.FC = () => {
       <View style={styles.logoutButton}>
         <Button title="Sair" onPress={handleLogout} />
       </View>
+      
     </View>
   );
 };
