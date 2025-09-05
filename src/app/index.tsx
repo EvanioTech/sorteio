@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image, ActivityIndicator } from "react-na
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles";
+import { StatusBar } from "react-native";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -53,6 +54,7 @@ export default function Home() {
       >
         <Text style={{ color: "black" }}>Já tem cadastro? Faça login</Text>
       </TouchableOpacity>
+      <StatusBar backgroundColor="#f0f0f0" barStyle="dark-content" />
     </View>
   );
 }

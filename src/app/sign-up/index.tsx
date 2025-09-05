@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
-import { db, initDB } from '../../db';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db, initDB, getFirstAsync } from '../../db';
 import styles from '../../../src/helpers/style-sigin-up';
+import  User  from '../models';
 
 const SignUp: React.FC = () => {
   const [nome, setNome] = useState('');
@@ -26,19 +28,34 @@ const SignUp: React.FC = () => {
 
     try {
       // Inserindo no banco
-      const result = await db.runAsync(
+      await db.runAsync(
         `INSERT INTO users (nome, senha) VALUES (?, ?)`,
         [nome, senha]
       );
 
-      if (result.changes > 0) {
-        console.log('Usuário criado com sucesso!');
-        Alert.alert('Sucesso', 'Usuário cadastrado!');
-        router.replace('/(tabs)');
+      // Recupera o usuário recém-criado
+      const usuario: User | null = await getFirstAsync<User>(
+        `SELECT * FROM users WHERE nome = ?`,
+        [nome]
+      );
+
+      if (!usuario) {
+        Alert.alert('Erro', 'Não foi possível recuperar o usuário cadastrado.');
+        return;
       }
+
+      // Salva no AsyncStorage para marcar como logado
+      await AsyncStorage.setItem('usuarioLogado', usuario.nome);
+
+      Alert.alert('Sucesso', 'Usuário cadastrado e logado!');
+      router.replace('/(tabs)'); // vai direto para a home já logado
     } catch (error: any) {
-      console.error("Erro ao salvar usuário", error);
-      Alert.alert('Erro', 'Não foi possível cadastrar o usuário.');
+      console.error('Erro ao salvar usuário', error);
+      if (error.message.includes('UNIQUE constraint failed')) {
+        Alert.alert('Erro', 'Nome já cadastrado!');
+      } else {
+        Alert.alert('Erro', 'Não foi possível cadastrar o usuário.');
+      }
     }
   };
 
@@ -73,5 +90,3 @@ const SignUp: React.FC = () => {
 };
 
 export default SignUp;
-
-

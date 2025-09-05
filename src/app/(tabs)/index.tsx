@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  View ,Text ,TouchableOpacity ,Modal ,Pressable ,TextInput ,Alert } from "react-native";
-import  User  from "../models";
+  View, Text, TouchableOpacity, Modal, Pressable, TextInput, Alert, StatusBar
+} from "react-native";
+import User from "../models";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { db } from "../../db";
+import { db, getAllAsync } from "../../db";
 import styles from "../../../src/helpers/stylehometab";
+
+interface Sorteio {
+  id: number;
+  tipo: "nome" | "numero";
+  valor: string;
+  userId: number;
+}
 
 const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -12,27 +20,44 @@ const Home: React.FC = () => {
   const [modalVisible2, setModalVisible2] = useState(false);
   const [participantName, setParticipantName] = useState("");
   const [maxNumber, setMaxNumber] = useState("");
+  const [nomes, setNomes] = useState<Sorteio[]>([]);
+  const [numeros, setNumeros] = useState<Sorteio[]>([]);
 
   // Buscar usuário logado
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const nome = await AsyncStorage.getItem("usuarioLogado");
-        if (!nome) return;
+  const fetchUser = async () => {
+    try {
+      const nome = await AsyncStorage.getItem("usuarioLogado");
+      if (!nome) return;
 
-        const result = await db.getFirstAsync<User>(
-          "SELECT * FROM users WHERE nome = ?",
-          [nome]
-        );
+      const result = await db.getFirstAsync<User>(
+        "SELECT * FROM users WHERE nome = ?",
+        [nome]
+      );
 
-        if (result) {
-          setUser(result);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar usuário:", error);
+      if (result) {
+        setUser(result);
+        fetchSorteios(result.id);
       }
-    };
+    } catch (error) {
+      console.error("Erro ao buscar usuário:", error);
+    }
+  };
 
+  // Buscar sorteios do usuário
+  const fetchSorteios = async (userId: number) => {
+    try {
+      const dados = await getAllAsync<Sorteio>(
+        "SELECT * FROM sorteios WHERE userId = ?",
+        [userId]
+      );
+      setNomes(dados.filter((d) => d.tipo === "nome"));
+      setNumeros(dados.filter((d) => d.tipo === "numero"));
+    } catch (error) {
+      console.error("Erro ao buscar sorteios:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchUser();
   }, []);
 
@@ -52,6 +77,9 @@ const Home: React.FC = () => {
       Alert.alert("Sucesso", "Participante adicionado!");
       setParticipantName("");
       setModalVisible1(false);
+
+      // Atualiza a lista de nomes
+      if (user) fetchSorteios(user.id);
     } catch (error) {
       console.error("Erro ao adicionar participante:", error);
       Alert.alert("Erro", "Não foi possível salvar o participante.");
@@ -74,6 +102,9 @@ const Home: React.FC = () => {
       Alert.alert("Sucesso", "Número salvo!");
       setMaxNumber("");
       setModalVisible2(false);
+
+      // Atualiza a lista de números
+      if (user) fetchSorteios(user.id);
     } catch (error) {
       console.error("Erro ao salvar número:", error);
       Alert.alert("Erro", "Não foi possível salvar o número.");
@@ -137,10 +168,9 @@ const Home: React.FC = () => {
           </View>
         </View>
       </Modal>
+      
     </View>
   );
 };
-
-
 
 export default Home;
