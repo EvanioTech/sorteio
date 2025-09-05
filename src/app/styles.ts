@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundImage: "url('../../assets/images/ger2.png')",
     alignItems: 'center',
     justifyContent: 'center',
     
@@ -26,10 +26,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 19,
     },
-    buttonLog: {
-        color: '#fff',
-        fontSize: 16,
+    buttontextdirect: { color: "#007bff", fontSize: 16,},
+    imageBackground: { 
+      flex: 1,
+      resizeMode: 'cover',
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
     },
+
 });
 
 

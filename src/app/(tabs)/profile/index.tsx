@@ -4,6 +4,7 @@ import { router, useFocusEffect } from "expo-router";
 import { initDB, getAllAsync, getFirstAsync, runAsync } from "../../../db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "../../../helpers/styleprofile";
+import { StatusBar } from "react-native";
 
 type User = {
   id: number;
@@ -121,6 +122,7 @@ const Profile: React.FC = () => {
           <Text style={styles.buttonText}>Sair</Text>
         </TouchableOpacity>
       </View>
+      <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
       
     </View>
   );

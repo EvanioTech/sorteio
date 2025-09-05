@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, initDB, getFirstAsync } from '../../db';
 import styles from '../../../src/helpers/style-sigin-up';
 import  User  from '../models';
+import { StatusBar } from 'react-native';
 
 const SignUp: React.FC = () => {
   const [nome, setNome] = useState('');
@@ -61,16 +62,19 @@ const SignUp: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../../../assets/images/ger.png')} style={styles.logo} />
+      <Image source={require('../../../assets/images/ger2.png')} style={styles.logo} />
+      <View style={styles.viewsignup}>
       <TextInput
         style={styles.input}
         placeholder="Digite seu nome"
+        placeholderTextColor="#fff"
         value={nome}
         onChangeText={setNome}
       />
       <TextInput
         style={styles.input}
         placeholder="Digite sua senha"
+        placeholderTextColor="#fff"
         secureTextEntry
         value={senha}
         onChangeText={setSenha}
@@ -78,6 +82,7 @@ const SignUp: React.FC = () => {
       <TextInput
         style={styles.input}
         placeholder="Repita sua senha"
+        placeholderTextColor="#fff"
         secureTextEntry
         value={confirmarSenha}
         onChangeText={setConfirmarSenha}
@@ -85,6 +90,8 @@ const SignUp: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={handleSignUp}>
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
+      </View>
+      <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
     </View>
   );
 };

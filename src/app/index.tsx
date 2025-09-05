@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, ImageBackground } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles";
@@ -37,9 +37,9 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <View>
-        <Image style={styles.image} source={require("../../assets/images/ger.png")} />
-      </View>
+        <View>
+          <Image style={styles.image} source={require("../../assets/images/ger2.png")} />
+        </View>
 
       <TouchableOpacity 
         onPress={() => router.push("/sign-up")}
@@ -52,9 +52,9 @@ export default function Home() {
         onPress={() => router.push("/sign-in")}
         style={{ marginTop: 10 }}
       >
-        <Text style={{ color: "black" }}>Já tem cadastro? Faça login</Text>
+        <Text style={ styles.buttontextdirect}>Já tem cadastro? Faça login</Text>
       </TouchableOpacity>
-      <StatusBar backgroundColor="#f0f0f0" barStyle="dark-content" />
+      <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
     </View>
   );
 }

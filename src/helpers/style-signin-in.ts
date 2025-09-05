@@ -5,12 +5,13 @@ const styles = StyleSheet.create({
   input: {
     height: 48,
     width: "100%",
-    borderColor: "#ccc",
+    borderColor: "#fff",
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 16,
     paddingHorizontal: 12,
     fontSize: 16,
+    color: "#fff"
   },
   button: {
     backgroundColor: "#007bff",
@@ -24,6 +25,15 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     marginBottom: 20,
+  },
+  linkText: { color: "#fff", marginTop: 16, textAlign: "center" },
+  viewsignin: { backgroundColor: '#2aabd3ff',
+  padding: 20,
+   borderRadius: 40,
+   width: '95%',
+   height: '50%',
+   alignSelf: 'center',
+   justifyContent: 'center'
   },
 });
 

@@ -10,6 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db, getAllAsync } from "../../../db";
 import  User  from "../../models";
 import styles from "../../../helpers/stylesorteio";
+import { StatusBar } from "react-native";
 
 interface Sorteio {
   id: number;
@@ -126,7 +127,9 @@ const SorteioSimples: React.FC = () => {
       </View>
 
       {resultado && <Text style={styles.resultado}>{resultado}</Text>}
+      <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
     </ScrollView>
+    
   );
 };
 

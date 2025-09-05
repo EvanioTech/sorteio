@@ -40,15 +40,19 @@ export default function Signin() {
   return (
     <View style={styles.container}>
       <Image source={require("../../../assets/images/ger.png")} style={styles.logo} />
+      <View style={styles.viewsignin}>
       <TextInput
         style={styles.input}
         placeholder="Digite seu nome"
+        placeholderTextColor="#fff"
+        
         value={nome}
         onChangeText={setNome}
       />
       <TextInput
         style={styles.input}
         placeholder="Digite sua senha"
+        placeholderTextColor="#fff"
         secureTextEntry
         value={senha}
         onChangeText={setSenha}
@@ -56,6 +60,10 @@ export default function Signin() {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push("/sign-up")}>
+        <Text style={styles.linkText}>Não tem uma conta? Cadastre-se</Text>
+      </TouchableOpacity>
+      </View>
     </View>
   );
 }
