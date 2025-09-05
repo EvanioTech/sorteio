@@ -29,6 +29,18 @@ const styles = StyleSheet.create({
      width: "60%",
       alignSelf: "center" 
     },
+  button: { 
+    backgroundColor: "red",
+     padding: 10,
+     borderRadius: 5,
+     alignItems: "center",
+     marginVertical: 5
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16
+  }
 
 });
 

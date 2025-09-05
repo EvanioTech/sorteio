@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Button, Alert } from "react-native";
+import { View, Text, Button, Alert, TouchableOpacity } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { initDB, getAllAsync, getFirstAsync, runAsync } from "../../../db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -117,7 +117,9 @@ const Profile: React.FC = () => {
 
       {/* Logout */}
       <View style={styles.logoutButton}>
-        <Button title="Sair" onPress={handleLogout} />
+        <TouchableOpacity onPress={handleLogout} style={styles.button}>
+          <Text style={styles.buttonText}>Sair</Text>
+        </TouchableOpacity>
       </View>
       
     </View>
