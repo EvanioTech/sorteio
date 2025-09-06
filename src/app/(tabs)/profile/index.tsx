@@ -77,12 +77,13 @@ const Profile: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.divider1}>
       <View style={styles.header} >
       <FontAwesome style={styles.title} name="user-circle" size={100} color="#070707ff" />
 
       {user && <Text style={styles.info}>{user.nome}</Text>}
       </View>
+      <View style={styles.divider1}>
+      
       </View>
       <View style={styles.divider2}>
 

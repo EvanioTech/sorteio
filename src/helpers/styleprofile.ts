@@ -3,8 +3,12 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
      flex: 1,
+     
       
-       backgroundColor: "#fff" 
+       backgroundColor: "#fff", 
+      
+        
+         
     },
   title: { 
     
@@ -14,33 +18,35 @@ const styles = StyleSheet.create({
         
     },
   header: { 
-    
-     backgroundColor: "#fff",
-      padding: 20,
-      marginTop: 70,
-      borderRadius: '50%',
-      borderBottomLeftRadius: 30,
-      borderBottomRightRadius: 30,
-      height: 180,
-      position: "relative",
-      justifyContent: "center",
-      alignItems: "center",
-      elevation: 5,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 3,
-  },
+  backgroundColor: "#fff",
+  position: "absolute",
+  top: 150,     // controla a distância do topo
+  left: "50%",  // centralizar horizontalmente
+  transform: [{ translateX: -150 }], // metade da largura p/ centralizar
+  width: 300,
+  height: 200,
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 10,   // garante que fica acima das outras views
+  borderRadius: '50%',
+  borderBottomLeftRadius: 10,
+  borderBottomRightRadius: 10,
+  
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 2,
+  shadowRadius: 2,
+  elevation: 55,
+},
   divider1: { 
     backgroundColor: '#5f5a5aff',
     flex: 1,
-    padding: 20,
-    marginBottom: 350,
+    
+    
   },
   divider2: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    flex: 1,
+    backgroundColor: '#fff',
+    flex: 2,
     
   },
   info: { 
@@ -51,32 +57,34 @@ const styles = StyleSheet.create({
     },
   buttonContainer1: { 
     
-    position: "absolute",
-     bottom: 350,
-      left: 80,
+    
+    
      width: "60%",
-      alignSelf: "center" 
+      alignSelf: "center", 
+      //marginBottom: 200
+      marginTop: 180
     },
   buttonContainer2: { 
-    position: "absolute",
-     bottom: 300,
-      left: 80,
+    marginTop: 20,
+     
      width: "60%",
       alignSelf: "center" 
     },
   logoutButton: { 
-    position: "absolute",
-     bottom: 240,
-      left: 80,
-     width: "60%",
-      alignSelf: "center" 
-    },
+    
+    justifyContent: "center",
+     alignSelf: "center",
+      marginTop: 40,
+   
+    width: "60%",
+    
+  },
   button: { 
     backgroundColor: "red",
      padding: 10,
      borderRadius: 5,
      alignItems: "center",
-     marginVertical: 5
+      
   },
   buttonText: {
     color: "#fff",
