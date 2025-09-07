@@ -63,10 +63,10 @@ const styles = StyleSheet.create({
      width: "60%",
       alignSelf: "center", 
       //marginBottom: 200
-      marginTop: 50
+      marginTop: 70
     },
   buttonContainer2: { 
-    marginTop: 40,
+    marginTop: 60,
      
      width: "60%",
       alignSelf: "center" 
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     
     justifyContent: "center",
      alignSelf: "center",
-      marginTop: 100,
+      marginTop: 80,
    
     width: "60%",
     
