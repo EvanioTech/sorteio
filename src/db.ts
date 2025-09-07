@@ -2,7 +2,7 @@ import { openDatabaseSync, type SQLiteDatabase } from "expo-sqlite";
 
 export const db: SQLiteDatabase = openDatabaseSync("app.db");
 
-// Criar tabelas
+// Criar tabelas e garantir usuário admin
 export const initDB = async () => {
   await db.execAsync(`
     PRAGMA foreign_keys = ON;
@@ -21,6 +21,17 @@ export const initDB = async () => {
       FOREIGN KEY(userId) REFERENCES users(id)
     );
   `);
+
+  // Garante que o admin exista
+  const admin = await getFirstAsync<{ id: number }>(
+    `SELECT id FROM users WHERE nome = ?`,
+    ["admin"]
+  );
+
+  if (!admin) {
+    await insertUser("admin", "admin");
+    console.log("Usuário admin criado com sucesso.");
+  }
 };
 
 // ---- Helpers ----

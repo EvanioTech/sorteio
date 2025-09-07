@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
   divider2: {
     backgroundColor: '#fff',
     flex: 2,
+    paddingTop: 50,
     
   },
   info: { 
@@ -62,10 +63,10 @@ const styles = StyleSheet.create({
      width: "60%",
       alignSelf: "center", 
       //marginBottom: 200
-      marginTop: 180
+      marginTop: 50
     },
   buttonContainer2: { 
-    marginTop: 20,
+    marginTop: 40,
      
      width: "60%",
       alignSelf: "center" 
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     
     justifyContent: "center",
      alignSelf: "center",
-      marginTop: 40,
+      marginTop: 100,
    
     width: "60%",
     
