@@ -6,17 +6,32 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"   // gera APK para instalar direto no celular
+      }
     },
     "preview": {
-      "distribution": "internal"
-      
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"   // também gera APK, bom para testes com QA/Google
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"  // gera AAB (obrigatório para Google Play)
+      },
+      "ios": {
+        "simulator": false         // build para devices reais
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "track": "internal"   // você pode mudar para "production", "beta" ou "alpha"
+      }
+    }
   }
 }
