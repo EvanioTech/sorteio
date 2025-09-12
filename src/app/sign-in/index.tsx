@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } fro
 import { router } from "expo-router";
 import { db } from "../../db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import  User  from "../models";
+import  User  from "../../models";
 import styles from "../../../src/helpers/style-signin-in";
 
 export default function Signin() {

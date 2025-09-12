@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, initDB, getFirstAsync } from '../../db';
 import styles from '../../../src/helpers/style-sigin-up';
-import  User  from '../models';
+import  User  from '../../models';
 import { StatusBar } from 'react-native';
 
 const SignUp: React.FC = () => {

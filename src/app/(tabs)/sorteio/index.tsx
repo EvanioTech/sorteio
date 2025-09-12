@@ -8,9 +8,10 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db, getAllAsync } from "../../../db";
-import  User  from "../../models";
+import User from "../../../models";
 import styles from "../../../helpers/stylesorteio";
 import { StatusBar } from "react-native";
+import { Image } from "expo-image"; // <- expo-image para suportar GIF animado
 
 interface Sorteio {
   id: number;
@@ -24,6 +25,11 @@ const SorteioSimples: React.FC = () => {
   const [nomes, setNomes] = useState<Sorteio[]>([]);
   const [numeros, setNumeros] = useState<Sorteio[]>([]);
   const [resultado, setResultado] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [tipoAtual, setTipoAtual] = useState<"nome" | "numero" | null>(null);
+
+  // Tempo de suspense (em ms) -> fácil de alterar
+  const TEMPO_SUSPENSE = 3000;
 
   // Função para carregar dados do banco
   const loadData = useCallback(async () => {
@@ -55,29 +61,37 @@ const SorteioSimples: React.FC = () => {
   useEffect(() => {
     loadData();
 
-    // Atualiza a cada 2 segundos para refletir mudanças externas (opcional)
     const interval = setInterval(loadData, 2000);
     return () => clearInterval(interval);
   }, [loadData]);
 
   const sortear = (tipo: "nome" | "numero") => {
-    if (tipo === "nome") {
-      if (nomes.length === 0) {
-        Alert.alert("Atenção", "Nenhum nome disponível!");
-        return;
-      }
-      const sorteado = nomes[Math.floor(Math.random() * nomes.length)];
-      setResultado(`Nome sorteado: ${sorteado.valor}`);
-    } else {
-      if (numeros.length === 0) {
-        Alert.alert("Atenção", "Nenhum número disponível!");
-        return;
-      }
+    setResultado(null); // limpa resultado anterior
+    setTipoAtual(tipo);
+    setLoading(true);
 
-      const max = Math.max(...numeros.map((n) => parseInt(n.valor, 10)));
-      const sorteado = Math.floor(Math.random() * max) + 1;
-      setResultado(`Número sorteado: ${sorteado}`);
-    }
+    setTimeout(() => {
+      if (tipo === "nome") {
+        if (nomes.length === 0) {
+          Alert.alert("Atenção", "Nenhum nome disponível!");
+          setLoading(false);
+          return;
+        }
+        const sorteado = nomes[Math.floor(Math.random() * nomes.length)];
+        setResultado(`Nome sorteado: ${sorteado.valor}`);
+      } else {
+        if (numeros.length === 0) {
+          Alert.alert("Atenção", "Nenhum número disponível!");
+          setLoading(false);
+          return;
+        }
+
+        const max = Math.max(...numeros.map((n) => parseInt(n.valor, 10)));
+        const sorteado = Math.floor(Math.random() * max) + 1;
+        setResultado(`Número sorteado: ${sorteado}`);
+      }
+      setLoading(false);
+    }, TEMPO_SUSPENSE);
   };
 
   return (
@@ -126,10 +140,42 @@ const SorteioSimples: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {resultado && <Text style={styles.resultado}>{resultado}</Text>}
+      {/* Suspense GIF */}
+      {loading && tipoAtual === "nome" && (
+        <Image
+          source={require("../../../../assets/images/x.gif")}
+          style={{
+            width: 180,
+            height: 180,
+            alignSelf: "center",
+            marginTop: 10,
+          }}
+          contentFit="contain"
+          autoplay
+        />
+      )}
+
+      {loading && tipoAtual === "numero" && (
+        <Image
+          source={require("../../../../assets/images/y.gif")}
+          style={{
+            width: 180,
+            height: 180,
+            alignSelf: "center",
+            marginTop: 10,
+          }}
+          contentFit="contain"
+          autoplay
+        />
+      )}
+
+      {/* Resultado */}
+      {resultado && !loading && (
+        <Text style={styles.resultado}>{resultado}</Text>
+      )}
+
       <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
     </ScrollView>
-    
   );
 };
 

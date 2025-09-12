@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   View, Text, TouchableOpacity, Modal, Pressable, TextInput, Alert, StatusBar
 } from "react-native";
-import User from "../models";
+import User from "../../models";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db, getAllAsync } from "../../db";
 import styles from "../../../src/helpers/stylehometab";

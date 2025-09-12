@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   header: { 
   backgroundColor: "#fff",
   position: "absolute",
-  top: 150,     // controla a distância do topo
+  top: 80,     // controla a distância do topo
   left: "50%",  // centralizar horizontalmente
   transform: [{ translateX: -150 }], // metade da largura p/ centralizar
   width: 300,
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 2,
   shadowRadius: 2,
-  elevation: 55,
+  elevation: 15,
 },
   divider1: { 
     backgroundColor: '#5f5a5aff',
