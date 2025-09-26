@@ -22,16 +22,7 @@ export const initDB = async () => {
     );
   `);
 
-  // Garante que o admin exista
-  const admin = await getFirstAsync<{ id: number }>(
-    `SELECT id FROM users WHERE nome = ?`,
-    ["admin"]
-  );
-
-  if (!admin) {
-    await insertUser("admin", "admin");
-    console.log("Usuário admin criado com sucesso.");
-  }
+  
 };
 
 // ---- Helpers ----
