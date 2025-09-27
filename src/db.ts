@@ -22,6 +22,18 @@ export const initDB = async () => {
     );
   `);
 
+  const adminUser = await getFirstAsync<{ id: number }>(
+    `SELECT id FROM users WHERE nome = ?`,
+    ['admin']
+  );
+
+  // 3. Insere o usuário 'admin' se ele não for encontrado
+  if (!adminUser) {
+    console.log("Usuário 'admin' não encontrado. Inserindo usuário inicial...");
+    await insertUser('admin', 'admin');
+    console.log("Usuário 'admin' (senha: admin) criado com sucesso.");
+  }
+
   
 };
 
