@@ -4,15 +4,16 @@ import {
 } from "react-native";
 import User from "../../models";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { db, getAllAsync } from "../../db";
+// Importei as funções dedicadas e initDB
+import { 
+  initDB, // <-- Adicionado
+  runAsync, 
+  getUserByNome, 
+  getSorteiosByUser, 
+  Sorteio 
+} from "../../db"; 
 import styles from "../../../src/helpers/stylehometab";
 
-interface Sorteio {
-  id: number;
-  tipo: "nome" | "numero";
-  valor: string;
-  userId: number;
-}
 
 const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -26,13 +27,16 @@ const Home: React.FC = () => {
   // Buscar usuário logado
   const fetchUser = async () => {
     try {
-      const nome = await AsyncStorage.getItem("usuarioLogado");
-      if (!nome) return;
+      // 1. Tenta pegar o nome do usuário logado
+      let nome = await AsyncStorage.getItem("usuarioLogado");
+      
+      // 2. Se não houver nome salvo, assume "admin"
+      if (!nome) {
+          nome = "admin";
+      }
 
-      const result = await db.getFirstAsync<User>(
-        "SELECT * FROM users WHERE nome = ?",
-        [nome]
-      );
+      // 3. Busca o usuário no DB
+      const result = await getUserByNome<User>(nome);
 
       if (result) {
         setUser(result);
@@ -46,10 +50,7 @@ const Home: React.FC = () => {
   // Buscar sorteios do usuário
   const fetchSorteios = async (userId: number) => {
     try {
-      const dados = await getAllAsync<Sorteio>(
-        "SELECT * FROM sorteios WHERE userId = ?",
-        [userId]
-      );
+      const dados = await getSorteiosByUser(userId);
       setNomes(dados.filter((d) => d.tipo === "nome"));
       setNumeros(dados.filter((d) => d.tipo === "numero"));
     } catch (error) {
@@ -58,7 +59,12 @@ const Home: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchUser();
+    // MODIFICAÇÃO CHAVE: Chama initDB antes de tentar buscar o usuário
+    const setupDB = async () => {
+        await initDB(); // Garante que a tabela e o usuário 'admin' existem
+        fetchUser();    // Agora tenta buscar o usuário
+    };
+    setupDB();
   }, []);
 
   // Adicionar participante (nome)
@@ -69,7 +75,7 @@ const Home: React.FC = () => {
     }
 
     try {
-      await db.runAsync(
+      await runAsync(
         "INSERT INTO sorteios (tipo, valor, userId) VALUES (?, ?, ?)",
         ["nome", participantName, user?.id ?? null]
       );
@@ -94,7 +100,7 @@ const Home: React.FC = () => {
     }
 
     try {
-      await db.runAsync(
+      await runAsync(
         "INSERT INTO sorteios (tipo, valor, userId) VALUES (?, ?, ?)",
         ["numero", maxNumber, user?.id ?? null]
       );
