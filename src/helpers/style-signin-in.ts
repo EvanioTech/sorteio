@@ -27,13 +27,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   linkText: { color: "#fff", marginTop: 16, textAlign: "center" },
-  viewsignin: { backgroundColor: '#2aabd3ff',
-  padding: 20,
-   borderRadius: 40,
-   width: '95%',
-   height: '50%',
-   alignSelf: 'center',
-   justifyContent: 'center'
+  viewsignin: { 
+    backgroundColor: '#2aabd3ff',
+      padding: 30,
+      borderRadius: 40,
+      width: '95%',
+      alignSelf: 'center',
+      justifyContent: 'flex-start',
   },
 });
 

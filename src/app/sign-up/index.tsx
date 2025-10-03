@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Image, TouchableOpacity, Alert } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  Image, 
+  TouchableOpacity, 
+  Alert, 
+  KeyboardAvoidingView, 
+  Platform, // Importante para o comportamento do teclado
+  StatusBar,
+  ScrollView // Importado para permitir a rolagem
+} from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { db, initDB, getFirstAsync } from '../../db';
-import styles from '../../../src/helpers/style-sigin-up';
-import  User  from '../../models';
-import { StatusBar } from 'react-native';
+// Assumindo que o 'db', 'initDB', e 'getFirstAsync' vêm desses caminhos
+import { db, initDB, getFirstAsync } from '../../db'; 
+// Assumindo que o 'styles' vem desse caminho
+import styles from '../../../src/helpers/style-sigin-up'; 
+import  User  from '../../models'; 
 
 const SignUp: React.FC = () => {
   const [nome, setNome] = useState('');
@@ -13,7 +25,7 @@ const SignUp: React.FC = () => {
   const [confirmarSenha, setConfirmarSenha] = useState('');
 
   useEffect(() => {
-    initDB(); // garante que a tabela existe antes de usar
+    initDB(); // Garante que a tabela existe antes de usar
   }, []);
 
   const handleSignUp = async () => {
@@ -49,10 +61,11 @@ const SignUp: React.FC = () => {
       await AsyncStorage.setItem('usuarioLogado', usuario.nome);
 
       Alert.alert('Sucesso', 'Usuário cadastrado e logado!');
-      router.replace('/(tabs)'); // vai direto para a home já logado
-    } catch (error: any) {
+      router.replace('/(tabs)'); // Vai direto para a home já logado
+    } catch (error) {
       console.error('Erro ao salvar usuário', error);
-      if (error.message.includes('UNIQUE constraint failed')) {
+      
+      if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
         Alert.alert('Erro', 'Nome já cadastrado!');
       } else {
         Alert.alert('Erro', 'Não foi possível cadastrar o usuário.');
@@ -61,38 +74,58 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Image source={require('../../../assets/images/ger2.png')} style={styles.logo} />
-      <View style={styles.viewsignup}>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite seu nome"
-        placeholderTextColor="#fff"
-        value={nome}
-        onChangeText={setNome}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Digite sua senha"
-        placeholderTextColor="#fff"
-        secureTextEntry
-        value={senha}
-        onChangeText={setSenha}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Repita sua senha"
-        placeholderTextColor="#fff"
-        secureTextEntry
-        value={confirmarSenha}
-        onChangeText={setConfirmarSenha}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Cadastrar</Text>
-      </TouchableOpacity>
-      </View>
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      // 'padding' para iOS, 'height' para Android.
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      keyboardVerticalOffset={0} 
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        keyboardShouldPersistTaps="handled" // Permite interagir com inputs sem fechar o teclado
+        showsVerticalScrollIndicator={false} // Opcional: esconde a barra de rolagem
+      >
+        <View style={styles.container}>
+            <Image 
+              source={require('../../../assets/images/ger2.png')} 
+              style={styles.logo} 
+            />
+            
+            <View style={styles.viewsignup}>
+              <TextInput
+                style={styles.input}
+                placeholder="Digite seu nome"
+                placeholderTextColor="#fff"
+                value={nome}
+                onChangeText={setNome}
+                autoCapitalize="none"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Digite sua senha"
+                placeholderTextColor="#fff"
+                secureTextEntry
+                value={senha}
+                onChangeText={setSenha}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Repita sua senha"
+                placeholderTextColor="#fff"
+                secureTextEntry
+                value={confirmarSenha}
+                onChangeText={setConfirmarSenha}
+              />
+              <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+                <Text style={styles.buttonText}>Cadastrar</Text>
+              </TouchableOpacity>
+            </View>
+        </View>
+      </ScrollView>
+
       <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
-    </View>
+      
+    </KeyboardAvoidingView>
   );
 };
 
