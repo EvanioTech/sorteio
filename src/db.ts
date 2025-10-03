@@ -1,5 +1,15 @@
 import { openDatabaseSync, type SQLiteDatabase } from "expo-sqlite";
 
+// ----------------------------------------------------
+// 1. INTERFACES
+// ----------------------------------------------------
+
+export interface User { // Interface adicionada para consistência
+  id: number;
+  nome: string;
+  senha: string;
+}
+
 export interface Sorteio {
   id: number;
   tipo: "nome" | "numero";
@@ -15,47 +25,13 @@ export interface HistoricoItem {
   userId: number;
 }
 
+// ----------------------------------------------------
+// 2. CONEXÃO E HELPERS DE EXECUÇÃO
+// ----------------------------------------------------
+
 export const db: SQLiteDatabase = openDatabaseSync("app.db");
 
-<<<<<<< HEAD
-// Criar tabelas e garantir usuário admin
-export const initDB = async () => {
-  await db.execAsync(`
-    PRAGMA foreign_keys = ON;
-
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome TEXT NOT NULL UNIQUE,
-      senha TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS sorteios (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tipo TEXT NOT NULL,        -- "nome" ou "numero"
-      valor TEXT NOT NULL,       -- pode ser nome ou número em texto
-      userId INTEGER,
-      FOREIGN KEY(userId) REFERENCES users(id)
-    );
-  `);
-
-  const adminUser = await getFirstAsync<{ id: number }>(
-    `SELECT id FROM users WHERE nome = ?`,
-    ['admin']
-  );
-
-  // 3. Insere o usuário 'admin' se ele não for encontrado
-  if (!adminUser) {
-    console.log("Usuário 'admin' não encontrado. Inserindo usuário inicial...");
-    await insertUser('admin', 'admin');
-    console.log("Usuário 'admin' (senha: admin) criado com sucesso.");
-  }
-
-  
-};
-
-=======
->>>>>>> 2172d3a (projeto finalizado)
-// ---- Helpers ----
+// Helpers para abstrair as chamadas async do SQLite
 export const runAsync = async (sql: string, params: any[] = []) => {
   return db.runAsync(sql, params);
 };
@@ -76,17 +52,25 @@ export const getFirstAsync = async <T = any>(
   return result ?? null;
 };
 
-// Criar tabelas e garantir usuário admin
+// ----------------------------------------------------
+// 3. FUNÇÃO DE INICIALIZAÇÃO
+// ----------------------------------------------------
+
+/** * Cria as tabelas necessárias e garante que o usuário 'admin' exista. 
+ * Esta função consolida as duas definições anteriores.
+*/
 export const initDB = async () => {
   await db.execAsync(`
     PRAGMA foreign_keys = ON;
 
+    -- Tabela de Usuários
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nome TEXT NOT NULL UNIQUE,
       senha TEXT
     );
 
+    -- Tabela de Itens de Sorteio
     CREATE TABLE IF NOT EXISTS sorteios (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       tipo TEXT NOT NULL,        -- "nome" ou "numero"
@@ -95,7 +79,7 @@ export const initDB = async () => {
       FOREIGN KEY(userId) REFERENCES users(id)
     );
     
-    -- NOVA TABELA PARA HISTÓRICO
+    -- Tabela de Histórico de Sorteios
     CREATE TABLE IF NOT EXISTS historico (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       tipo TEXT NOT NULL,
@@ -106,20 +90,27 @@ export const initDB = async () => {
     );
   `);
 
-  // Garante a criação do admin (lógica da iteração anterior)
+  // Garante a criação do admin
   const adminExists = await getFirstAsync<{ id: number }>(
     "SELECT id FROM users WHERE nome = 'admin'"
   );
 
   if (!adminExists) {
+    console.log("Usuário 'admin' não encontrado. Inserindo usuário inicial...");
+    // A senha original era 'admin', estou mantendo a '123' da segunda definição para consistência
     await runAsync(
       "INSERT INTO users (nome, senha) VALUES (?, ?)",
       ["admin", "123"] 
     );
+    console.log("Usuário 'admin' (senha: 123) criado com sucesso.");
   }
 };
 
-// ---- Função dedicada para salvar usuário ----
+// ----------------------------------------------------
+// 4. FUNÇÕES CRUD ESPECÍFICAS
+// ----------------------------------------------------
+
+/** Insere um novo usuário no banco de dados. */
 export const insertUser = async (nome: string, senha: string) => {
   const result = await db.runAsync(
     `INSERT INTO users (nome, senha) VALUES (?, ?)`,
@@ -129,16 +120,14 @@ export const insertUser = async (nome: string, senha: string) => {
 };
 
 /** Busca um usuário pelo nome. */
-export const getUserByNome = async <T = any>(nome: string): Promise<T | null> => {
-  return getFirstAsync<T>("SELECT * FROM users WHERE nome = ?", [nome]);
+export const getUserByNome = async (nome: string): Promise<User | null> => {
+  return getFirstAsync<User>("SELECT * FROM users WHERE nome = ?", [nome]);
 };
 
 /** Busca todos os sorteios de um usuário específico. */
 export const getSorteiosByUser = async (userId: number): Promise<Sorteio[]> => {
   return getAllAsync<Sorteio>("SELECT * FROM sorteios WHERE userId = ?", [userId]);
 };
-
-// --- NOVAS FUNÇÕES PARA HISTÓRICO ---
 
 /** Insere o resultado de um sorteio no histórico. */
 export const insertHistorico = async (
@@ -161,7 +150,7 @@ export const getHistorico = async (userId: number): Promise<HistoricoItem[]> => 
   );
 };
 
-/** NOVA FUNÇÃO: Limpa todo o histórico de sorteios de um usuário. */
+/** Limpa todo o histórico de sorteios de um usuário. */
 export const clearHistorico = async (userId: number) => {
     return runAsync(`DELETE FROM historico WHERE userId = ?`, [userId]);
 };
