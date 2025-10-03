@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
+  // --- ESTILOS PRINCIPAIS DA TELA ---
   container: {
     flex: 1,
     justifyContent: "center",
@@ -18,6 +19,8 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 100,
   },
+  
+  // --- ESTILOS DOS BOTÕES PRINCIPAIS ---
   button1: {
     backgroundColor: "#007bff",
     padding: 12,
@@ -45,6 +48,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  
+  // --- ESTILOS DO MODAL ---
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -58,33 +63,50 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  closeButton: {
-    marginTop: 16,
-    backgroundColor: "#f44336",
-    padding: 10,
-    borderRadius: 6,
-  },
-  closeButtonText: {
-    color: "#fff",
+  
+  // ✅ NOVO ESTILO: Título do Modal
+  modalTitle: {
+    fontSize: 18,
     fontWeight: "bold",
+    marginBottom: 15, // Adicionado espaço
+    textAlign: "center",
+    color: "#333",
   },
+  
+  // ✅ AJUSTADO: Adicionada margem inferior para separar inputs no modal de números
   input: {
     width: "100%",
     height: 40,
     borderColor: "gray",
     borderWidth: 1,
-    marginBottom: 10,
+    marginBottom: 10, 
     paddingHorizontal: 10,
   },
+  
+  // --- BOTÕES DENTRO DO MODAL ---
   addButton: {
     backgroundColor: "#007bff",
     padding: 10,
     borderRadius: 6,
     alignItems: "center",
+    width: "100%", // Ocupa a largura total do modalContent
+    marginTop: 5,
   },
   addButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  closeButton: {
+    marginTop: 16,
+    backgroundColor: "#f44336",
+    padding: 10,
+    borderRadius: 6,
+    width: "100%", // Ocupa a largura total do modalContent
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 

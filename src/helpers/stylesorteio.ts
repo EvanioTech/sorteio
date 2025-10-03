@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
+  // --- ESTILOS GERAIS ---
   container: {
     flexGrow: 1,
     justifyContent: "flex-start",
@@ -52,18 +53,53 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-  resultado: {
-    fontSize: 20,
+  
+  // ✅ ATUALIZADO: Nome do resultado final para ser único no código TS
+  resultadoFinal: {
+    fontSize: 24,
     fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
     marginTop: 30,
-    color: "#d63384",
+    padding: 15,
+    backgroundColor: "#fffbe6", // Fundo de destaque
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#ffd700",
+  },
+  
+  // --- NOVOS ESTILOS PARA CONTROLE DE REPETIÇÃO ---
+  repetitionControl: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    marginBottom: 10,
+    backgroundColor: '#f0f0f0', 
+    borderRadius: 8,
+    width: '100%',
+  },
+  repetitionText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  infoText: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#007bff',
+    marginBottom: 15,
+    padding: 5,
+    borderRadius: 5,
+    backgroundColor: '#e6f2ff',
+    width: '100%',
+    fontWeight: 'bold',
   },
 
-  // --- NOVOS ESTILOS PARA HISTÓRICO E TRAVA ---
-
-  // Estilo para o botão de histórico
+  // --- ESTILOS DE HISTÓRICO E TRAVA ---
   historyButton: {
-    backgroundColor: "#4a484eff", // Cor escura para destaque
+    backgroundColor: "#4a484eff", 
     padding: 10,
     borderRadius: 8,
     marginTop: 15,
@@ -77,18 +113,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
-
-  // Estilo para botão desabilitado (trava de execução)
   buttonDisabled: {
     opacity: 0.6,
   },
 
-  // --- ESTILOS DO MODAL ---
+  // --- ESTILOS DO MODAL DE HISTÓRICO ---
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fundo escuro transparente
+    backgroundColor: "rgba(0, 0, 0, 0.5)", 
   },
   modalContent: {
     width: "90%",
@@ -111,7 +145,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   historyScroll: {
-    maxHeight: 300, // Limita a altura do scroll
+    maxHeight: 300, 
     marginBottom: 10,
     paddingRight: 5,
   },
@@ -130,10 +164,8 @@ const styles = StyleSheet.create({
     color: "#999",
     textAlign: "right",
   },
-  
-  // --- NOVO ESTILO: BOTÃO EXCLUIR HISTÓRICO ---
   clearButton: {
-    backgroundColor: "#ffc107", // Cor amarela/alerta
+    backgroundColor: "#ffc107", 
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
@@ -141,20 +173,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   clearButtonText: {
-    color: "#343a40", // Texto escuro
+    color: "#343a40", 
     fontWeight: "bold",
   },
-
   closeButton: {
-    backgroundColor: "#dc3545", // Cor para fechar (vermelho)
+    backgroundColor: "#dc3545", 
     padding: 10,
     borderRadius: 5,
-    // Removido o marginTop para que o clearButton fique mais perto
   },
   closeButtonText: {
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
+  },
+  
+  // --- ESTILOS DO NOVO MODAL DE CONTAGEM REGRESSIVA ---
+  countdownOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.85)', // Fundo bem escuro
+  },
+  countdownBox: {
+    padding: 50,
+    backgroundColor: '#333',
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 180,
+    minHeight: 180,
+  },
+  countdownText: {
+    fontSize: 72,
+    fontWeight: '900',
+    color: '#fff',
+    marginBottom: 10,
   },
 });
 

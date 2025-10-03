@@ -4,9 +4,8 @@ import {
 } from "react-native";
 import User from "../../models";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-// Importei as funções dedicadas e initDB
 import { 
-  initDB, // <-- Adicionado
+  initDB, 
   runAsync, 
   getUserByNome, 
   getSorteiosByUser, 
@@ -14,28 +13,30 @@ import {
 } from "../../db"; 
 import styles from "../../../src/helpers/stylehometab";
 
+const MAX_LIMIT = 10000; // Constante para o limite máximo
 
 const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [modalVisible1, setModalVisible1] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [participantName, setParticipantName] = useState("");
+  
+  // ✅ NOVOS ESTADOS PARA O INTERVALO
+  const [minNumber, setMinNumber] = useState(""); 
   const [maxNumber, setMaxNumber] = useState("");
+  
   const [nomes, setNomes] = useState<Sorteio[]>([]);
   const [numeros, setNumeros] = useState<Sorteio[]>([]);
 
   // Buscar usuário logado
   const fetchUser = async () => {
     try {
-      // 1. Tenta pegar o nome do usuário logado
       let nome = await AsyncStorage.getItem("usuarioLogado");
       
-      // 2. Se não houver nome salvo, assume "admin"
       if (!nome) {
           nome = "admin";
       }
 
-      // 3. Busca o usuário no DB
       const result = await getUserByNome<User>(nome);
 
       if (result) {
@@ -59,10 +60,9 @@ const Home: React.FC = () => {
   };
 
   useEffect(() => {
-    // MODIFICAÇÃO CHAVE: Chama initDB antes de tentar buscar o usuário
     const setupDB = async () => {
-        await initDB(); // Garante que a tabela e o usuário 'admin' existem
-        fetchUser();    // Agora tenta buscar o usuário
+        await initDB(); 
+        fetchUser();    
     };
     setupDB();
   }, []);
@@ -77,14 +77,13 @@ const Home: React.FC = () => {
     try {
       await runAsync(
         "INSERT INTO sorteios (tipo, valor, userId) VALUES (?, ?, ?)",
-        ["nome", participantName, user?.id ?? null]
+        ["nome", participantName.trim(), user?.id ?? null]
       );
 
       Alert.alert("Sucesso", "Participante adicionado!");
       setParticipantName("");
       setModalVisible1(false);
 
-      // Atualiza a lista de nomes
       if (user) fetchSorteios(user.id);
     } catch (error) {
       console.error("Erro ao adicionar participante:", error);
@@ -92,33 +91,54 @@ const Home: React.FC = () => {
     }
   };
 
-  // Adicionar número máximo
-  const handleAddMaxNumber = async () => {
-    if (!maxNumber.trim() || isNaN(Number(maxNumber))) {
-      Alert.alert("Atenção", "Digite um número válido!");
+  // ✅ NOVO: Adicionar Intervalo de Número
+  const handleAddNumberInterval = async () => {
+    const min = Number(minNumber.trim());
+    const max = Number(maxNumber.trim());
+
+    // 1. Validação de formato e preenchimento
+    if (!minNumber.trim() || !maxNumber.trim() || isNaN(min) || isNaN(max)) {
+      Alert.alert("Atenção", "Preencha o Mínimo e o Máximo com números válidos!");
       return;
     }
+
+    // 2. Validação de ordem
+    if (min >= max) {
+        Alert.alert("Atenção", "O número mínimo deve ser menor que o número máximo!");
+        return;
+    }
+
+    // 3. Validação de limite máximo
+    if (max > MAX_LIMIT) {
+        Alert.alert("Atenção", `O número máximo não pode exceder ${MAX_LIMIT}!`);
+        return;
+    }
+    
+    // 4. Concatena os valores para salvar no DB (ex: "1-100")
+    const valorSorteio = `${min}-${max}`;
 
     try {
       await runAsync(
         "INSERT INTO sorteios (tipo, valor, userId) VALUES (?, ?, ?)",
-        ["numero", maxNumber, user?.id ?? null]
+        ["numero", valorSorteio, user?.id ?? null]
       );
 
-      Alert.alert("Sucesso", "Número salvo!");
+      Alert.alert("Sucesso", `Intervalo ${valorSorteio} salvo!`);
+      setMinNumber("");
       setMaxNumber("");
       setModalVisible2(false);
 
-      // Atualiza a lista de números
       if (user) fetchSorteios(user.id);
     } catch (error) {
-      console.error("Erro ao salvar número:", error);
-      Alert.alert("Erro", "Não foi possível salvar o número.");
+      console.error("Erro ao salvar intervalo de número:", error);
+      Alert.alert("Erro", "Não foi possível salvar o intervalo de número.");
     }
   };
 
   return (
     <View style={styles.container}>
+      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      
       {user ? (
         <Text style={styles.title}>Bem-vindo, {user.nome}!</Text>
       ) : (
@@ -134,13 +154,15 @@ const Home: React.FC = () => {
         <Text style={styles.buttonText2}>Sorteio de números</Text>
       </TouchableOpacity>
 
-      {/* MODAL PARA NOMES */}
+      {/* MODAL PARA NOMES (Não Alterado) */}
       <Modal animationType="slide" transparent visible={modalVisible1} onRequestClose={() => setModalVisible1(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Adicionar Participante</Text>
             <TextInput
               placeholder="Digite o nome do participante"
               style={styles.input}
+              placeholderTextColor="#666"
               value={participantName}
               onChangeText={setParticipantName}
             />
@@ -154,19 +176,31 @@ const Home: React.FC = () => {
         </View>
       </Modal>
 
-      {/* MODAL PARA NÚMEROS */}
+      {/* ✅ MODAL PARA NÚMEROS (Alterado para Intervalo) */}
       <Modal animationType="slide" transparent visible={modalVisible2} onRequestClose={() => setModalVisible2(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Definir Intervalo de Sorteio</Text>
+
             <TextInput
-              placeholder="Digite o número máximo"
+              placeholder="Número Mínimo (ex: 1)"
               style={styles.input}
+              placeholderTextColor="#666"
+              value={minNumber}
+              onChangeText={setMinNumber}
+              keyboardType="numeric"
+            />
+            <TextInput
+              placeholder={`Número Máximo (limite ${MAX_LIMIT})`}
+              style={styles.input}
+              placeholderTextColor="#666"
               value={maxNumber}
               onChangeText={setMaxNumber}
               keyboardType="numeric"
             />
-            <TouchableOpacity onPress={handleAddMaxNumber} style={styles.addButton}>
-              <Text style={styles.addButtonText}>Adicionar</Text>
+            
+            <TouchableOpacity onPress={handleAddNumberInterval} style={styles.addButton}>
+              <Text style={styles.addButtonText}>Salvar Intervalo</Text>
             </TouchableOpacity>
             <Pressable onPress={() => setModalVisible2(false)} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Fechar</Text>

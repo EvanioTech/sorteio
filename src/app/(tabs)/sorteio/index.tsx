@@ -7,21 +7,23 @@ import {
   ScrollView,
   Modal, 
   Pressable, 
+  Switch,
+  Platform, 
+  ActivityIndicator
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-// Importação das funções e interfaces do db.ts, incluindo clearHistorico
 import { 
   db, 
   getAllAsync, 
   insertHistorico, 
   getHistorico, 
   HistoricoItem, 
-  clearHistorico 
+  clearHistorico,
+  getUserByNome 
 } from "../../../db"; 
 import User from "../../../models";
 import styles from "../../../helpers/stylesorteio";
 import { StatusBar } from "react-native";
-import { Image } from "expo-image";
 
 interface Sorteio {
   id: number;
@@ -40,7 +42,17 @@ const SorteioSimples: React.FC = () => {
   const [historico, setHistorico] = useState<HistoricoItem[]>([]); 
   const [modalVisible, setModalVisible] = useState(false);
 
-  const TEMPO_SUSPENSE = 3000;
+  // NOVOS ESTADOS PARA CONTROLE DE REPETIÇÃO
+  const [naoRepetir, setNaoRepetir] = useState(false);
+  const [nomesDisponiveis, setNomesDisponiveis] = useState<Sorteio[]>([]);
+  const [numerosDisponiveis, setNumerosDisponiveis] = useState<number[]>([]); 
+
+  // Estados para Contagem Regressiva
+  const [countdownVisible, setCountdownVisible] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  
+  const TEMPO_CONTAGEM = 3000; 
+  const [dadosCarregados, setDadosCarregados] = useState(false); // NOVO: Controle de carga inicial
 
   const loadData = useCallback(async () => {
     try {
@@ -49,10 +61,7 @@ const SorteioSimples: React.FC = () => {
         nome = "admin";
       }
 
-      const usuario = await db.getFirstAsync<User>(
-        "SELECT * FROM users WHERE nome = ?",
-        [nome]
-      );
+      const usuario = await getUserByNome(nome);
 
       if (usuario) {
         setUser(usuario);
@@ -62,37 +71,92 @@ const SorteioSimples: React.FC = () => {
           [usuario.id]
         );
 
-        setNomes(dados.filter((d) => d.tipo === "nome"));
-        setNumeros(dados.filter((d) => d.tipo === "numero"));
+        const nomesFiltrados = dados.filter((d) => d.tipo === "nome");
+        const numerosFiltrados = dados.filter((d) => d.tipo === "numero");
+
+        setNomes(nomesFiltrados);
+        setNumeros(numerosFiltrados);
+        
+        // 🚩 CORREÇÃO: Inicializa listas disponíveis APENAS se ainda não carregadas
+        if (!dadosCarregados) {
+            setNomesDisponiveis(nomesFiltrados);
+            
+            if (numerosFiltrados.length > 0) {
+                const max = Math.max(...numerosFiltrados.map((n) => parseInt(n.valor, 10)));
+                setNumerosDisponiveis(Array.from({ length: max }, (_, i) => i + 1));
+            } else {
+                setNumerosDisponiveis([]);
+            }
+            setDadosCarregados(true);
+        }
       }
     } catch (error) {
       console.error("Erro ao buscar sorteios:", error);
     }
-  }, []);
+  }, [dadosCarregados]);
 
+  // 🚩 CORREÇÃO: Chamado apenas na montagem. Sem setInterval para evitar reset.
   useEffect(() => {
     loadData();
-
-    const interval = setInterval(loadData, 2000);
-    return () => clearInterval(interval);
+    // Se precisar atualizar dados após um CRUD, chame loadData() manualmente
   }, [loadData]);
 
-  const handleShowHistorico = async () => {
+  // Efeito para resetar os itens disponíveis quando a regra de repetição é DESLIGADA
+  useEffect(() => {
+    if (!naoRepetir && dadosCarregados) {
+        setNomesDisponiveis(nomes);
+        if (numeros.length > 0) {
+            const max = Math.max(...numeros.map((n) => parseInt(n.valor, 10)));
+            setNumerosDisponiveis(Array.from({ length: max }, (_, i) => i + 1));
+        }
+    }
+    // Reajusta a lista disponível se os itens de sorteio mudarem (ex: após um CRUD)
+    // Se o modo 'Não Repetir' estiver ativo, esta função **NÃO DEVE** ser chamada.
+    // O ajuste é feito dentro da função loadData.
+  }, [naoRepetir, nomes, numeros, dadosCarregados]);
+
+  // Lógica da Contagem Regressiva
+  useEffect(() => {
+      let timer: NodeJS.Timeout;
+
+      if (countdownVisible && countdown > 0) {
+          timer = setTimeout(() => {
+              setCountdown(prev => prev - 1);
+          }, 1000);
+      } else if (countdown === 0) {
+          setCountdownVisible(false);
+          setCountdown(3); 
+      }
+
+      return () => clearTimeout(timer);
+  }, [countdownVisible, countdown]);
+  
+  const resetDisponiveis = useCallback(() => {
+      setNomesDisponiveis(nomes);
+      if (numeros.length > 0) {
+          const max = Math.max(...numeros.map((n) => parseInt(n.valor, 10)));
+          setNumerosDisponiveis(Array.from({ length: max }, (_, i) => i + 1));
+      }
+      Alert.alert("Sessão Reiniciada", "Todos os itens foram sorteados. A lista foi resetada.");
+  }, [nomes, numeros]);
+
+
+  const handleShowHistorico = async () => { /* ... (código mantido) ... */
     if (!user) {
-      Alert.alert("Atenção", "Usuário não carregado.");
-      return;
-    }
-    try {
-        const dadosHistorico = await getHistorico(user.id);
-        setHistorico(dadosHistorico);
-        setModalVisible(true);
-    } catch (error) {
-        console.error("Erro ao carregar histórico:", error);
-        Alert.alert("Erro", "Não foi possível carregar o histórico.");
-    }
+        Alert.alert("Atenção", "Usuário não carregado.");
+        return;
+      }
+      try {
+          const dadosHistorico = await getHistorico(user.id);
+          setHistorico(dadosHistorico);
+          setModalVisible(true);
+      } catch (error) {
+          console.error("Erro ao carregar histórico:", error);
+          Alert.alert("Erro", "Não foi possível carregar o histórico.");
+      }
   };
   
-  const handleClearHistorico = () => {
+  const handleClearHistorico = () => { /* ... (código mantido) ... */
     if (!user) return;
 
     Alert.alert(
@@ -108,7 +172,7 @@ const SorteioSimples: React.FC = () => {
                 onPress: async () => {
                     try {
                         await clearHistorico(user.id);
-                        setHistorico([]); // Limpa a lista na tela
+                        setHistorico([]); 
                         Alert.alert("Sucesso", "Histórico limpo!");
                     } catch (error) {
                         console.error("Erro ao limpar histórico:", error);
@@ -130,34 +194,65 @@ const SorteioSimples: React.FC = () => {
     setResultado(null);
     setTipoAtual(tipo);
     setLoading(true);
+    setCountdownVisible(true); // INICIA O MODAL DE CONTAGEM
 
+    // O resultado real é processado depois da contagem
     setTimeout(async () => {
       let resultadoFinal: string;
       const userId = user?.id ?? 0;
+      let sorteado: Sorteio | number | undefined;
 
       if (tipo === "nome") {
-        if (nomes.length === 0) {
-          Alert.alert("Atenção", "Nenhum nome disponível!");
+        const listaAtual = naoRepetir ? nomesDisponiveis : nomes;
+        
+        if (listaAtual.length === 0) {
+          Alert.alert("Atenção", naoRepetir ? "Não há mais nomes disponíveis para sorteio! A sessão será reiniciada." : "Nenhum nome disponível!");
           setLoading(false);
+          setCountdownVisible(false);
+          if (naoRepetir) resetDisponiveis(); // Reinicia lista após aviso
           return;
         }
-        const sorteado = nomes[Math.floor(Math.random() * nomes.length)];
+        
+        const randomIndex = Math.floor(Math.random() * listaAtual.length);
+        sorteado = listaAtual[randomIndex];
         resultadoFinal = `Nome sorteado: ${sorteado.valor}`;
-      } else {
-        if (numeros.length === 0) {
-          Alert.alert("Atenção", "Nenhum número disponível!");
-          setLoading(false);
-          return;
+
+        if (naoRepetir && sorteado) {
+            setNomesDisponiveis(prev => prev.filter(n => n.id !== (sorteado as Sorteio).id));
         }
 
-        const max = Math.max(...numeros.map((n) => parseInt(n.valor, 10)));
-        const sorteado = Math.floor(Math.random() * max) + 1;
+      } else { // Sorteio de número
+        const maxEntrada = numeros.length > 0 ? Math.max(...numeros.map((n) => parseInt(n.valor, 10))) : 0;
+        
+        if (maxEntrada === 0) {
+            Alert.alert("Atenção", "Nenhuma faixa de número definida!");
+            setLoading(false);
+            setCountdownVisible(false);
+            return;
+        }
+
+        const listaAtual = naoRepetir ? numerosDisponiveis : Array.from({ length: maxEntrada }, (_, i) => i + 1);
+
+        if (listaAtual.length === 0) {
+            Alert.alert("Atenção", "Não há mais números disponíveis para sorteio! A sessão será reiniciada.");
+            setLoading(false);
+            setCountdownVisible(false);
+            if (naoRepetir) resetDisponiveis(); // Reinicia lista após aviso
+            return;
+        }
+        
+        const randomIndex = Math.floor(Math.random() * listaAtual.length);
+        sorteado = listaAtual[randomIndex];
         resultadoFinal = `Número sorteado: ${sorteado}`;
+
+        if (naoRepetir && sorteado) {
+            setNumerosDisponiveis(prev => prev.filter(n => n !== (sorteado as number)));
+        }
       }
       
       if (userId > 0) {
         try {
-            await insertHistorico(tipo, resultadoFinal, userId);
+            await insertHistorico(tipo, resultadoFinal, userId); 
         } catch (error) {
             console.error("Erro ao salvar histórico:", error);
         }
@@ -165,7 +260,7 @@ const SorteioSimples: React.FC = () => {
 
       setResultado(resultadoFinal);
       setLoading(false);
-    }, TEMPO_SUSPENSE);
+    }, TEMPO_CONTAGEM);
   };
 
   return (
@@ -173,6 +268,24 @@ const SorteioSimples: React.FC = () => {
       <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
       
       {user && <Text style={styles.title}>Sorteio de {user.nome}</Text>}
+
+      {/* Opção de Não Repetir */}
+      <View style={styles.repetitionControl}>
+        <Text style={styles.repetitionText}>Não Repetir Itens na Sessão</Text>
+        <Switch
+            onValueChange={setNaoRepetir}
+            value={naoRepetir}
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={naoRepetir ? "#f5dd4b" : "#f4f3f4"}
+        />
+      </View>
+      
+      {naoRepetir && (
+          <Text style={styles.infoText}>
+              Nomes disponíveis: {nomesDisponiveis.length} | 
+              Números disponíveis: {numerosDisponiveis.length}
+          </Text>
+      )}
 
       <TouchableOpacity
         style={styles.historyButton}
@@ -225,41 +338,28 @@ const SorteioSimples: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Suspense GIF */}
-      {loading && tipoAtual === "nome" && (
-        <Image
-          source={require("../../../../assets/images/x.gif")}
-          style={{
-            width: 180,
-            height: 180,
-            alignSelf: "center",
-            marginTop: 10,
-          }}
-          contentFit="contain"
-          autoplay
-        />
-      )}
-
-      {loading && tipoAtual === "numero" && (
-        <Image
-          source={require("../../../../assets/images/y.gif")}
-          style={{
-            width: 180,
-            height: 180,
-            alignSelf: "center",
-            marginTop: 10,
-          }}
-          contentFit="contain"
-          autoplay
-        />
-      )}
-
       {/* Resultado */}
       {resultado && !loading && (
-        <Text style={styles.resultado}>{resultado}</Text>
+        <Text style={styles.resultadoFinal}>{resultado}</Text>
       )}
 
-      {/* --- MODAL DE HISTÓRICO --- */}
+      {/* --- MODAL DE CONTAGEM REGRESSIVA --- */}
+      <Modal 
+        animationType="fade" 
+        transparent={true} 
+        visible={countdownVisible}
+      >
+        <View style={styles.countdownOverlay}>
+          <View style={styles.countdownBox}>
+            <Text style={styles.countdownText}>{countdown}</Text>
+            {/* Opcional: Adicionar um loading visual */}
+            {countdown > 0 && <ActivityIndicator size="large" color="#fff" />} 
+          </View>
+        </View>
+      </Modal>
+      {/* ------------------------------------- */}
+      
+      {/* --- MODAL DE HISTÓRICO --- (Mantido) */}
       <Modal 
         animationType="slide" 
         transparent={true} 
@@ -277,7 +377,6 @@ const SorteioSimples: React.FC = () => {
                                 <Text style={{fontWeight: 'bold', textTransform: 'capitalize'}}>{item.tipo}:</Text> {item.resultado}
                             </Text>
                             <Text style={styles.historyDate}>
-                                {/* MODIFICAÇÃO CHAVE: Especifica o locale 'pt-BR' */}
                                 {new Date(item.dataSorteio).toLocaleString('pt-BR')}
                             </Text>
                         </View>
