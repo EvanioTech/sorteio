@@ -19,9 +19,10 @@ const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [modalVisible1, setModalVisible1] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-  const [participantName, setParticipantName] = useState("");
+  // 💡 ATUALIZADO: participantName agora pode conter múltiplos nomes/linhas.
+  const [participantName, setParticipantName] = useState(""); 
   
-  // ✅ NOVOS ESTADOS PARA O INTERVALO
+  // NOVOS ESTADOS PARA O INTERVALO
   const [minNumber, setMinNumber] = useState(""); 
   const [maxNumber, setMaxNumber] = useState("");
   
@@ -67,31 +68,50 @@ const Home: React.FC = () => {
     setupDB();
   }, []);
 
-  // Adicionar participante (nome)
+  // 💡 FUNÇÃO ATUALIZADA: Adicionar múltiplos participantes (nome)
   const handleAddParticipant = async () => {
     if (!participantName.trim()) {
-      Alert.alert("Atenção", "Digite um nome válido!");
+      Alert.alert("Atenção", "Cole ou digite um ou mais nomes válidos!");
       return;
+    }
+    
+    // Processa a lista de nomes:
+    // 1. Divide o texto por quebra de linha (se o usuário colou uma lista).
+    // 2. Filtra strings vazias.
+    // 3. Mapeia para remover espaços em branco no início/fim de cada nome.
+    const nomesParaSalvar = participantName
+        .split('\n')
+        .map(nome => nome.trim())
+        .filter(nome => nome.length > 0);
+
+    if (nomesParaSalvar.length === 0) {
+        Alert.alert("Atenção", "Nenhum nome válido encontrado na lista.");
+        return;
     }
 
     try {
-      await runAsync(
-        "INSERT INTO sorteios (tipo, valor, userId) VALUES (?, ?, ?)",
-        ["nome", participantName.trim(), user?.id ?? null]
+      // 💡 PREPARA MÚLTIPLAS INSERÇÕES
+      const insertPromises = nomesParaSalvar.map(nome => 
+        runAsync(
+          "INSERT INTO sorteios (tipo, valor, userId) VALUES (?, ?, ?)",
+          ["nome", nome, user?.id ?? null]
+        )
       );
+      
+      await Promise.all(insertPromises);
 
-      Alert.alert("Sucesso", "Participante adicionado!");
+      Alert.alert("Sucesso", `${nomesParaSalvar.length} participante(s) adicionado(s)!`);
       setParticipantName("");
       setModalVisible1(false);
 
       if (user) fetchSorteios(user.id);
     } catch (error) {
       console.error("Erro ao adicionar participante:", error);
-      Alert.alert("Erro", "Não foi possível salvar o participante.");
+      Alert.alert("Erro", "Não foi possível salvar os participantes.");
     }
   };
 
-  // ✅ NOVO: Adicionar Intervalo de Número
+  // Adicionar Intervalo de Número (Mantido)
   const handleAddNumberInterval = async () => {
     const min = Number(minNumber.trim());
     const max = Number(maxNumber.trim());
@@ -154,20 +174,24 @@ const Home: React.FC = () => {
         <Text style={styles.buttonText2}>Sorteio de números</Text>
       </TouchableOpacity>
 
-      {/* MODAL PARA NOMES (Não Alterado) */}
+      {/* 💡 MODAL PARA NOMES (ATUALIZADO PARA MÚLTIPLAS LINHAS) */}
       <Modal animationType="slide" transparent visible={modalVisible1} onRequestClose={() => setModalVisible1(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Adicionar Participante</Text>
+            <Text style={styles.modalTitle}>Adicionar Participante(s)</Text>
+            
+            {/* 💡 TextInput MULTILINE */}
             <TextInput
-              placeholder="Digite o nome do participante"
-              style={styles.input}
+              placeholder="Cole ou digite uma lista de nomes (um por linha)"
+              style={[styles.input, { height: 100, textAlignVertical: 'top' }]} // Aumenta a altura e alinha o texto ao topo
               placeholderTextColor="#666"
               value={participantName}
               onChangeText={setParticipantName}
+              multiline={true} // Habilita múltiplas linhas
             />
+            
             <TouchableOpacity onPress={handleAddParticipant} style={styles.addButton}>
-              <Text style={styles.addButtonText}>Adicionar</Text>
+              <Text style={styles.addButtonText}>Adicionar Lista</Text>
             </TouchableOpacity>
             <Pressable onPress={() => setModalVisible1(false)} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Fechar</Text>
@@ -176,7 +200,7 @@ const Home: React.FC = () => {
         </View>
       </Modal>
 
-      {/* ✅ MODAL PARA NÚMEROS (Alterado para Intervalo) */}
+      {/* MODAL PARA NÚMEROS (Mantido) */}
       <Modal animationType="slide" transparent visible={modalVisible2} onRequestClose={() => setModalVisible2(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
