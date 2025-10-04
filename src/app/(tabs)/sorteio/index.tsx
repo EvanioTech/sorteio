@@ -293,7 +293,8 @@ const SorteioSimples: React.FC = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
+      <StatusBar backgroundColor="#030008" barStyle="light-content" /> 
+
       
       {user && <Text style={styles.title}>Sorteio de {user.nome}</Text>}
 
