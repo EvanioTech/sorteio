@@ -54,7 +54,7 @@ export default function Home() {
       >
         <Text style={ styles.buttontextdirect}>Já tem cadastro? Faça login</Text>
       </TouchableOpacity>
-      <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
+      
     </View>
   );
 }

@@ -194,7 +194,7 @@ const Home: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="#030008" barStyle="light-content" />
+      
       
       {user ? (
         <Text style={styles.title}>Bem-vindo, {user.nome}!</Text>

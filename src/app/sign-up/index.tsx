@@ -123,7 +123,7 @@ const SignUp: React.FC = () => {
         </View>
       </ScrollView>
 
-      <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
+      <StatusBar backgroundColor="#4a484eff" barStyle="dark-content" translucent={false} />
       
     </KeyboardAvoidingView>
   );

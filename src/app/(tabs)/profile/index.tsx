@@ -4,7 +4,6 @@ import { router, useFocusEffect } from "expo-router";
 import { initDB, getAllAsync, getFirstAsync, runAsync } from "../../../db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "../../../helpers/styleprofile";
-import { StatusBar } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
 type User = {
@@ -131,7 +130,7 @@ const Profile: React.FC = () => {
         </TouchableOpacity>
       </View>
       </View>
-      <StatusBar backgroundColor="#4a484eff" barStyle="light-content" />
+      
       
     </View>
   );
