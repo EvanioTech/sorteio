@@ -28,14 +28,14 @@ import { StatusBar } from "react-native";
 interface Sorteio {
   id: number;
   tipo: "nome" | "numero";
-  valor: string;
+  valor: string; // O valor para número agora é "min-max"
   userId: number;
 }
 
 const SorteioSimples: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [nomes, setNomes] = useState<Sorteio[]>([]);
-  const [numeros, setNumeros] = useState<Sorteio[]>([]);
+  const [numeros, setNumeros] = useState<Sorteio[]>([]); // Contém o objeto Sorteio { valor: "min-max" }
   const [resultado, setResultado] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [tipoAtual, setTipoAtual] = useState<"nome" | "numero" | null>(null);
@@ -81,9 +81,16 @@ const SorteioSimples: React.FC = () => {
         if (!dadosCarregados) {
             setNomesDisponiveis(nomesFiltrados);
             
+            // 💡 LÓGICA CORRIGIDA para INTERVALO DE NÚMEROS
             if (numerosFiltrados.length > 0) {
-                const max = Math.max(...numerosFiltrados.map((n) => parseInt(n.valor, 10)));
-                setNumerosDisponiveis(Array.from({ length: max }, (_, i) => i + 1));
+                // Acha o primeiro intervalo (assumindo que só haverá um, como no seu código)
+                const [minStr, maxStr] = numerosFiltrados[0].valor.split('-');
+                const min = parseInt(minStr, 10);
+                const max = parseInt(maxStr, 10);
+                
+                // Cria o Array com todos os números no intervalo [min, max]
+                const rangeArray = Array.from({ length: max - min + 1 }, (_, i) => i + min);
+                setNumerosDisponiveis(rangeArray);
             } else {
                 setNumerosDisponiveis([]);
             }
@@ -105,14 +112,15 @@ const SorteioSimples: React.FC = () => {
   useEffect(() => {
     if (!naoRepetir && dadosCarregados) {
         setNomesDisponiveis(nomes);
+        // 💡 LÓGICA CORRIGIDA para INTERVALO DE NÚMEROS
         if (numeros.length > 0) {
-            const max = Math.max(...numeros.map((n) => parseInt(n.valor, 10)));
-            setNumerosDisponiveis(Array.from({ length: max }, (_, i) => i + 1));
+            const [minStr, maxStr] = numeros[0].valor.split('-');
+            const min = parseInt(minStr, 10);
+            const max = parseInt(maxStr, 10);
+            const rangeArray = Array.from({ length: max - min + 1 }, (_, i) => i + min);
+            setNumerosDisponiveis(rangeArray);
         }
     }
-    // Reajusta a lista disponível se os itens de sorteio mudarem (ex: após um CRUD)
-    // Se o modo 'Não Repetir' estiver ativo, esta função **NÃO DEVE** ser chamada.
-    // O ajuste é feito dentro da função loadData.
   }, [naoRepetir, nomes, numeros, dadosCarregados]);
 
   // Lógica da Contagem Regressiva
@@ -133,9 +141,13 @@ const SorteioSimples: React.FC = () => {
   
   const resetDisponiveis = useCallback(() => {
       setNomesDisponiveis(nomes);
+      // 💡 LÓGICA CORRIGIDA para INTERVALO DE NÚMEROS
       if (numeros.length > 0) {
-          const max = Math.max(...numeros.map((n) => parseInt(n.valor, 10)));
-          setNumerosDisponiveis(Array.from({ length: max }, (_, i) => i + 1));
+          const [minStr, maxStr] = numeros[0].valor.split('-');
+          const min = parseInt(minStr, 10);
+          const max = parseInt(maxStr, 10);
+          const rangeArray = Array.from({ length: max - min + 1 }, (_, i) => i + min);
+          setNumerosDisponiveis(rangeArray);
       }
       Alert.alert("Sessão Reiniciada", "Todos os itens foram sorteados. A lista foi resetada.");
   }, [nomes, numeros]);
@@ -222,16 +234,24 @@ const SorteioSimples: React.FC = () => {
         }
 
       } else { // Sorteio de número
-        const maxEntrada = numeros.length > 0 ? Math.max(...numeros.map((n) => parseInt(n.valor, 10))) : 0;
         
-        if (maxEntrada === 0) {
+        if (numeros.length === 0) {
             Alert.alert("Atenção", "Nenhuma faixa de número definida!");
             setLoading(false);
             setCountdownVisible(false);
             return;
         }
 
-        const listaAtual = naoRepetir ? numerosDisponiveis : Array.from({ length: maxEntrada }, (_, i) => i + 1);
+        // 💡 LÓGICA CORRIGIDA: Obtém o MIN e MAX do primeiro (e esperado único) registro de número
+        const [minStr, maxStr] = numeros[0].valor.split('-');
+        const minEntrada = parseInt(minStr, 10);
+        const maxEntrada = parseInt(maxStr, 10);
+
+        // Cria a lista completa de números no intervalo [min, max]
+        const listaCompleta = Array.from({ length: maxEntrada - minEntrada + 1 }, (_, i) => i + minEntrada);
+
+        // Usa a lista de disponíveis se 'Não Repetir' estiver ativo, senão usa a completa
+        const listaAtual = naoRepetir ? numerosDisponiveis : listaCompleta;
 
         if (listaAtual.length === 0) {
             Alert.alert("Atenção", "Não há mais números disponíveis para sorteio! A sessão será reiniciada.");
@@ -243,7 +263,7 @@ const SorteioSimples: React.FC = () => {
         
         const randomIndex = Math.floor(Math.random() * listaAtual.length);
         sorteado = listaAtual[randomIndex];
-        resultadoFinal = `Número sorteado: ${sorteado}`;
+        resultadoFinal = `Número sorteado: ${sorteado} (Intervalo: ${minEntrada} a ${maxEntrada})`;
 
         if (naoRepetir && sorteado) {
             setNumerosDisponiveis(prev => prev.filter(n => n !== (sorteado as number)));
@@ -322,11 +342,18 @@ const SorteioSimples: React.FC = () => {
         <Text style={styles.sectionTitle}>Números</Text>
         <View style={styles.scrollBox}>
           <ScrollView>
-            {numeros.map((n) => (
-              <Text key={n.id} style={styles.item}>
-                • até {n.valor}
-              </Text>
-            ))}
+            {numeros.map((n) => {
+              // 💡 CORREÇÃO APLICADA AQUI: Extrai min e max para exibição
+              const range = n.valor.split('-');
+              const min = range[0];
+              const max = range.length > 1 ? range[1] : n.valor; // Se não for intervalo, usa o valor original
+              
+              return (
+                <Text key={n.id} style={styles.item}>
+                  • de {min} a {max}
+                </Text>
+              );
+            })}
           </ScrollView>
         </View>
         <TouchableOpacity

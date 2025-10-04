@@ -100,9 +100,9 @@ export const initDB = async () => {
     // A senha original era 'admin', estou mantendo a '123' da segunda definição para consistência
     await runAsync(
       "INSERT INTO users (nome, senha) VALUES (?, ?)",
-      ["admin", "123"] 
+      ["admin", "1234"] 
     );
-    console.log("Usuário 'admin' (senha: 123) criado com sucesso.");
+    console.log("Usuário 'admin' (senha: 1234) criado com sucesso.");
   }
 };
 
