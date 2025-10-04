@@ -24,6 +24,7 @@ import {
 import User from "../../../models";
 import styles from "../../../helpers/stylesorteio";
 import { StatusBar } from "react-native";
+import { useFocusEffect } from '@react-navigation/native'; 
 
 interface Sorteio {
   id: number;
@@ -35,14 +36,14 @@ interface Sorteio {
 const SorteioSimples: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [nomes, setNomes] = useState<Sorteio[]>([]);
-  const [numeros, setNumeros] = useState<Sorteio[]>([]); // Contém o objeto Sorteio { valor: "min-max" }
+  const [numeros, setNumeros] = useState<Sorteio[]>([]); 
   const [resultado, setResultado] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [tipoAtual, setTipoAtual] = useState<"nome" | "numero" | null>(null);
   const [historico, setHistorico] = useState<HistoricoItem[]>([]); 
   const [modalVisible, setModalVisible] = useState(false);
 
-  // NOVOS ESTADOS PARA CONTROLE DE REPETIÇÃO
+  // ESTADOS PARA CONTROLE DE REPETIÇÃO
   const [naoRepetir, setNaoRepetir] = useState(false);
   const [nomesDisponiveis, setNomesDisponiveis] = useState<Sorteio[]>([]);
   const [numerosDisponiveis, setNumerosDisponiveis] = useState<number[]>([]); 
@@ -52,8 +53,9 @@ const SorteioSimples: React.FC = () => {
   const [countdown, setCountdown] = useState(3);
   
   const TEMPO_CONTAGEM = 3000; 
-  const [dadosCarregados, setDadosCarregados] = useState(false); // NOVO: Controle de carga inicial
+  // 🚩 REMOVIDO: O estado dadosCarregados não é mais necessário
 
+  // 💡 FUNÇÃO loadData AJUSTADA: Não toca nas listas disponíveis
   const loadData = useCallback(async () => {
     try {
       let nome = await AsyncStorage.getItem("usuarioLogado");
@@ -77,51 +79,57 @@ const SorteioSimples: React.FC = () => {
         setNomes(nomesFiltrados);
         setNumeros(numerosFiltrados);
         
-        // 🚩 CORREÇÃO: Inicializa listas disponíveis APENAS se ainda não carregadas
-        if (!dadosCarregados) {
+        // 🚩 NOVO: Se o modo 'Não Repetir' está ativo, atualiza a lista de disponíveis
+        if (naoRepetir) {
+             // SÓ ATUALIZA SE ESTIVER NO MODO NÃO REPETIR PARA GARANTIR CONSISTÊNCIA
             setNomesDisponiveis(nomesFiltrados);
-            
-            // 💡 LÓGICA CORRIGIDA para INTERVALO DE NÚMEROS
+
             if (numerosFiltrados.length > 0) {
-                // Acha o primeiro intervalo (assumindo que só haverá um, como no seu código)
                 const [minStr, maxStr] = numerosFiltrados[0].valor.split('-');
                 const min = parseInt(minStr, 10);
                 const max = parseInt(maxStr, 10);
-                
-                // Cria o Array com todos os números no intervalo [min, max]
                 const rangeArray = Array.from({ length: max - min + 1 }, (_, i) => i + min);
                 setNumerosDisponiveis(rangeArray);
             } else {
                 setNumerosDisponiveis([]);
             }
-            setDadosCarregados(true);
         }
       }
     } catch (error) {
       console.error("Erro ao buscar sorteios:", error);
     }
-  }, [dadosCarregados]);
+  }, [naoRepetir]); // Depende do naoRepetir para só recarregar a lista disponível quando ativo.
 
-  // 🚩 CORREÇÃO: Chamado apenas na montagem. Sem setInterval para evitar reset.
-  useEffect(() => {
-    loadData();
-    // Se precisar atualizar dados após um CRUD, chame loadData() manualmente
-  }, [loadData]);
+  // 💡 useFocusEffect: Recarrega sempre que a tela é focada (resolve o problema da Home)
+  useFocusEffect(
+      useCallback(() => {
+          loadData();
+          return () => {};
+      }, [loadData])
+  );
 
-  // Efeito para resetar os itens disponíveis quando a regra de repetição é DESLIGADA
+  // 💡 Efeito para controlar o estado do NÃO REPETIR (AGORA INDEPENDENTE DO loadData)
+  // Isso garante que a lista de disponíveis seja preenchida/resetada quando a opção é ligada/desligada.
   useEffect(() => {
-    if (!naoRepetir && dadosCarregados) {
+    if (naoRepetir) {
+        // Liga: Preenche as listas de disponíveis com base nas listas completas (nomes, numeros)
         setNomesDisponiveis(nomes);
-        // 💡 LÓGICA CORRIGIDA para INTERVALO DE NÚMEROS
         if (numeros.length > 0) {
             const [minStr, maxStr] = numeros[0].valor.split('-');
             const min = parseInt(minStr, 10);
             const max = parseInt(maxStr, 10);
             const rangeArray = Array.from({ length: max - min + 1 }, (_, i) => i + min);
             setNumerosDisponiveis(rangeArray);
+        } else {
+             setNumerosDisponiveis([]);
         }
+    } else {
+        // Desliga: Limpa as listas, pois não são usadas no modo Repetir
+        setNomesDisponiveis([]);
+        setNumerosDisponiveis([]);
     }
-  }, [naoRepetir, nomes, numeros, dadosCarregados]);
+  }, [naoRepetir, nomes, numeros]);
+
 
   // Lógica da Contagem Regressiva
   useEffect(() => {
@@ -139,9 +147,9 @@ const SorteioSimples: React.FC = () => {
       return () => clearTimeout(timer);
   }, [countdownVisible, countdown]);
   
+  // Função para resetar a lista de disponíveis (chamada após esgotar os itens)
   const resetDisponiveis = useCallback(() => {
       setNomesDisponiveis(nomes);
-      // 💡 LÓGICA CORRIGIDA para INTERVALO DE NÚMEROS
       if (numeros.length > 0) {
           const [minStr, maxStr] = numeros[0].valor.split('-');
           const min = parseInt(minStr, 10);
@@ -153,7 +161,7 @@ const SorteioSimples: React.FC = () => {
   }, [nomes, numeros]);
 
 
-  const handleShowHistorico = async () => { /* ... (código mantido) ... */
+  const handleShowHistorico = async () => { 
     if (!user) {
         Alert.alert("Atenção", "Usuário não carregado.");
         return;
@@ -168,7 +176,7 @@ const SorteioSimples: React.FC = () => {
       }
   };
   
-  const handleClearHistorico = () => { /* ... (código mantido) ... */
+  const handleClearHistorico = () => { 
     if (!user) return;
 
     Alert.alert(
@@ -215,13 +223,14 @@ const SorteioSimples: React.FC = () => {
       let sorteado: Sorteio | number | undefined;
 
       if (tipo === "nome") {
+        // Usa a lista de disponíveis se 'Não Repetir' estiver ativo, senão usa a lista completa
         const listaAtual = naoRepetir ? nomesDisponiveis : nomes;
         
         if (listaAtual.length === 0) {
           Alert.alert("Atenção", naoRepetir ? "Não há mais nomes disponíveis para sorteio! A sessão será reiniciada." : "Nenhum nome disponível!");
           setLoading(false);
           setCountdownVisible(false);
-          if (naoRepetir) resetDisponiveis(); // Reinicia lista após aviso
+          if (naoRepetir) resetDisponiveis(); 
           return;
         }
         
@@ -242,7 +251,6 @@ const SorteioSimples: React.FC = () => {
             return;
         }
 
-        // 💡 LÓGICA CORRIGIDA: Obtém o MIN e MAX do primeiro (e esperado único) registro de número
         const [minStr, maxStr] = numeros[0].valor.split('-');
         const minEntrada = parseInt(minStr, 10);
         const maxEntrada = parseInt(maxStr, 10);
@@ -257,7 +265,7 @@ const SorteioSimples: React.FC = () => {
             Alert.alert("Atenção", "Não há mais números disponíveis para sorteio! A sessão será reiniciada.");
             setLoading(false);
             setCountdownVisible(false);
-            if (naoRepetir) resetDisponiveis(); // Reinicia lista após aviso
+            if (naoRepetir) resetDisponiveis(); 
             return;
         }
         
@@ -343,10 +351,10 @@ const SorteioSimples: React.FC = () => {
         <View style={styles.scrollBox}>
           <ScrollView>
             {numeros.map((n) => {
-              // 💡 CORREÇÃO APLICADA AQUI: Extrai min e max para exibição
+              // Extrai min e max para exibição
               const range = n.valor.split('-');
               const min = range[0];
-              const max = range.length > 1 ? range[1] : n.valor; // Se não for intervalo, usa o valor original
+              const max = range.length > 1 ? range[1] : n.valor; 
               
               return (
                 <Text key={n.id} style={styles.item}>
