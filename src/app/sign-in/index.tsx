@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, Image , } from "react-native";
+import { View,
+   Text,
+    TextInput,
+     TouchableOpacity,
+      Alert, Image ,ScrollView, KeyboardAvoidingView,
+    Platform } from "react-native";
 import { router } from "expo-router";
 import { db } from "../../db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -44,6 +49,10 @@ export default function Signin() {
   };
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+    keyboardShouldPersistTaps="handled"
+    >  
     <View style={styles.container}>
       <Image source={require("../../../assets/images/ger.png")} style={styles.logo} />
       <View style={styles.viewsignin}>
@@ -71,6 +80,8 @@ export default function Signin() {
       </TouchableOpacity>
       </View>
     </View>
+    </ScrollView> 
+    </KeyboardAvoidingView>
   );
 }
 

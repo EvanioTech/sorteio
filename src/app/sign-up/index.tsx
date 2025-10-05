@@ -8,7 +8,6 @@ import {
   Alert, 
   KeyboardAvoidingView, 
   Platform, // Importante para o comportamento do teclado
-  StatusBar,
   ScrollView // Importado para permitir a rolagem
 } from 'react-native';
 import { router } from 'expo-router';
@@ -123,7 +122,7 @@ const SignUp: React.FC = () => {
         </View>
       </ScrollView>
 
-      <StatusBar backgroundColor="#4a484eff" barStyle="dark-content" translucent={false} />
+      
       
     </KeyboardAvoidingView>
   );

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, ActivityIndicator, ImageBackground
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles";
-import { StatusBar } from "react-native";
+
 
 export default function Home() {
   const [loading, setLoading] = useState(true);

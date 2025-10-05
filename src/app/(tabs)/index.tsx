@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, TouchableOpacity, Modal, Pressable, TextInput, Alert, StatusBar
+  View, Text, TouchableOpacity, Modal, Pressable, TextInput, Alert
 } from "react-native";
 import User from "../../models";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -37,7 +37,7 @@ const Home: React.FC = () => {
           nome = "admin";
       }
 
-      const result = await getUserByNome<User>(nome);
+      const result = await getUserByNome(nome);
 
       if (result) {
         setUser(result);

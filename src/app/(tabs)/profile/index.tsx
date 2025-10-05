@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, Button, Alert, TouchableOpacity } from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, Text, Button, Alert, TouchableOpacity, StatusBar } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { initDB, getAllAsync, getFirstAsync, runAsync } from "../../../db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,6 +23,19 @@ const Profile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [temNomes, setTemNomes] = useState(false);
   const [temNumeros, setTemNumeros] = useState(false);
+
+
+  useFocusEffect(
+        useCallback(() => {
+            // 🚩 QUANDO A TELA É FOCADA (entramos na tela)
+            // Define o conteúdo da barra de status como claro (light-content)
+            StatusBar.setBarStyle('light-content'); 
+
+            // 💡 Função de limpeza: QUANDO A TELA PERDE O FOCO (saímos da tela)
+            // Define o conteúdo da barra de status de volta para escuro (dark-content)
+            return () => StatusBar.setBarStyle('dark-content');
+        }, [])
+    );
 
   const fetchData = async () => {
     try {
@@ -130,7 +143,7 @@ const Profile: React.FC = () => {
         </TouchableOpacity>
       </View>
       </View>
-      
+
       
     </View>
   );
