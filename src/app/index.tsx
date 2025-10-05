@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, ImageBackground } from "react-native";
-import { router } from "expo-router";
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, StatusBar } from "react-native";
+import { router, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles";
 
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      StatusBar.setBarStyle("dark-content");
+      
+    }, [])
+  );
 
   useEffect(() => {
     const checkLogin = async () => {
