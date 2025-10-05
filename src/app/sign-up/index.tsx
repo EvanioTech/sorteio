@@ -77,7 +77,7 @@ const SignUp: React.FC = () => {
       style={{ flex: 1 }} 
       // 'padding' para iOS, 'height' para Android.
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-      keyboardVerticalOffset={0} 
+      
     >
       <ScrollView 
         contentContainerStyle={styles.scrollContent} 
