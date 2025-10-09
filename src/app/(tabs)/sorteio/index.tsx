@@ -25,6 +25,8 @@ import User from "../../../models";
 import styles from "../../../helpers/stylesorteio";
 import { StatusBar } from "react-native";
 import { useFocusEffect } from '@react-navigation/native'; 
+import { BannerAd } from "react-native-google-mobile-ads";
+import BannerAdComponent from "../../../components/banner";
 
 interface Sorteio {
   id: number;
@@ -437,6 +439,7 @@ const SorteioSimples: React.FC = () => {
         </View>
       </Modal>
       {/* --------------------------- */}
+      <BannerAdComponent />
     </ScrollView>
   );
 };

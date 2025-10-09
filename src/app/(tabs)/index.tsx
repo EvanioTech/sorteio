@@ -12,6 +12,8 @@ import {
   Sorteio 
 } from "../../db"; 
 import styles from "../../../src/helpers/stylehometab";
+import { BannerAd } from "react-native-google-mobile-ads";
+import BannerAdComponent from "../../components/banner";
 
 const MAX_LIMIT = 10000; // Constante para o limite máximo
 
@@ -281,6 +283,7 @@ const Home: React.FC = () => {
           </View>
         </View>
       </Modal>
+      <BannerAdComponent />
       
     </View>
   );

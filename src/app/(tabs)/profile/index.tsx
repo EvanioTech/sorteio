@@ -5,6 +5,8 @@ import { initDB, getAllAsync, getFirstAsync, runAsync } from "../../../db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "../../../helpers/styleprofile";
 import { FontAwesome } from "@expo/vector-icons";
+import { BannerAd } from "react-native-google-mobile-ads";
+import BannerAdComponent from "../../../components/banner";
 
 type User = {
   id: number;
@@ -143,6 +145,7 @@ const Profile: React.FC = () => {
         </TouchableOpacity>
       </View>
       </View>
+      <BannerAdComponent />
 
       
     </View>
